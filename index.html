@@ -108,17 +108,10 @@
     }
   </style>
 
-  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-  <script>
-    vkBridge.send('VKWebAppInit');
-  </script>
 
 </head>
 
 <body>
-  <script>
-    vkBridge.send('VKWebAppInit');
-  </script>
 
   <div id="start">
     <h1 id="title">Крестики Нолики</h1>
@@ -127,10 +120,6 @@
       <button onclick="startGame('computer')">Против Компьютера</button><br>
     </div>
 
-    <div id="lower">
-      <button id="low" onclick="share()">Поделиться</button><br>
-      <button id="low" onclick="inviteFriend()">Пригласить друга</button><br>
-    </div>
 
   </div>
 
@@ -163,64 +152,13 @@
     ];
     let gameType = '';
 
-
-    let adCount = 0;
-    function adds() {
-      adCount++;
-      console.log(adCount);
-      //баннер
-      vkBridge.send('VKWebAppShowBannerAd', {
-        banner_location: 'bottom'
-      })
-        .then((data) => {
-          if (data.result) {
-            // Баннерная реклама отобразилась
-          }
-        })
-        .catch((error) => {
-          // Ошибка
-          console.log(error);
-        });
-
-
-      if (adCount === 2) {
-        vkBridge.send('VKWebAppShowNativeAds', {
-          ad_format: 'interstitial' /* Тип рекламы */
-        })
-          .then((data) => {
-            if (data.result) {
-              // Реклама была показана
-            } else {
-              // Ошибка
-            }
-          })
-          .catch((error) => { console.log(error); });
-      }
-
-      if (adCount === 5) {
-        adCount = -1;
-        vkBridge.send('VKWebAppShowNativeAds', {
-          ad_format: 'interstitial' /* Тип рекламы */
-        })
-          .then((data) => {
-            if (data.result) {
-              // Реклама была показана
-            } else {
-              // Ошибка
-            }
-          })
-          .catch((error) => { console.log(error); });
-      }
-    }
-
-
     function startGame(type) {
       adds();
       gameType = type;
       document.getElementById('start').style.display = 'none';
       document.getElementById('board').style.display = 'block';
       document.getElementById('finish').style.display = 'none';
-      document.getElementById('current-player').innerText = `Ходит игрок: ${currentPlayer}`; // Обновление информации о текущем игроке
+      document.getElementById('current-player').innerText = `Current player: ${currentPlayer}`; // Обновление информации о текущем игроке
       renderBoard();
       if (gameType === 'computer' && currentPlayer === 'O') {
         setTimeout(computerMove, 1);
@@ -232,16 +170,16 @@
         board[row][col] = currentPlayer;
         renderBoard();
         if (checkWin(currentPlayer)) {
-          showFinishMessage(currentPlayer + ' ПОБЕДИЛ!');
+          showFinishMessage(currentPlayer + ' WIN!');
           setTimeout(resetGame, 2000);
           return;
         } else if (checkDraw()) {
-          showFinishMessage('НИЧЬЯ!!!');
+          showFinishMessage('DRAW!!!');
           setTimeout(resetGame, 2000);
           return;
         }
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        document.getElementById('current-player').innerText = `Ходит игрок: ${currentPlayer}`; // Обновление информации о текущем игроке
+        document.getElementById('current-player').innerText = `Current player: ${currentPlayer}`; // Обновление информации о текущем игроке
         if (gameType === 'computer' && currentPlayer === 'O') {
           setTimeout(computerMove, 1);
         }
@@ -329,16 +267,16 @@
       board[move.i][move.j] = currentPlayer;
       renderBoard();
       if (checkWin(currentPlayer)) {
-        showFinishMessage('КОМПЬЮТЕР ВЫИГРАЛ!');
+        showFinishMessage('COMPUTER WIN!');
         setTimeout(resetGame, 2000);
         return;
       } else if (checkDraw()) {
-        showFinishMessage('НИЧЬЯ!!!');
+        showFinishMessage('DRAW!!!');
         setTimeout(resetGame, 2000);
         return;
       }
       currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      document.getElementById('current-player').innerText = `Ходит игрок: ${currentPlayer}`; // Обновление информации о текущем игроке
+      document.getElementById('current-player').innerText = `Current player: ${currentPlayer}`; // Обновление информации о текущем игроке
     }
 
     function minimax(board, depth, isMaximizing) {
@@ -398,40 +336,6 @@
         else if (board[0][2] === 'O') return 10;
       }
       return null; // No winner yet
-    }
-
-    function share() {
-      vkBridge.send('VKWebAppShare', {
-  link: 'https://vk.com/app51895658'
-  })
-  .then((data) => { 
-    if (data.result) {
-      // Запись размещена, история опубликована, сообщение отправлено
-    }
-  })
-  .catch((error) => {
-    // Ошибка
-    console.log(error);
-  });
-    }
-
-    function inviteFriend() {
-      vkBridge.send('VKWebAppShowInviteBox', {
-  requestKey: "key-12345" //  Ключ приглашения
-  })
-  .then( (data) => {
-    if (data.success) {
-      // Пользователь нажал «Пригласить» 
-      // ...
-  
-      // Этим выбранным пользователям 
-      // не удалось отправить приглашения 
-      console.log('Приглашения не отправлены', data.notSentIds);
-    }
-  })
-  .catch( (error) => {
-    console.log(error); // Ошибка 
-  });
     }
   </script>
 
