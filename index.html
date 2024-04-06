@@ -147,7 +147,7 @@
   </div>
 
   <script>
-    
+    let count = 0;
     let currentPlayer = 'X';
     let board = [
       ['', '', ''],
@@ -168,16 +168,31 @@
       }
     }
 
+    function ads(){
+      if(count === 5){
+          const callbacks = {
+        adFinished: () => console.log("End midgame ad"),
+        adError: (error) => console.log("Error midgame ad", error),
+        adStarted: () => console.log("Start midgame ad"),
+      };
+      window.CrazyGames.SDK.ad.requestAd("midgame", callbacks);
+        count = 0;
+    }
+      count++;
+    }
+    
     function makeMove(row, col) {
       if (board[row][col] === '') {
         board[row][col] = currentPlayer;
         renderBoard();
         if (checkWin(currentPlayer)) {
           showFinishMessage(currentPlayer + ' WIN!');
+          ads();
           setTimeout(resetGame, 2000);
           return;
         } else if (checkDraw()) {
           showFinishMessage('DRAW!!!');
+          ads();
           setTimeout(resetGame, 2000);
           return;
         }
@@ -271,10 +286,12 @@
       renderBoard();
       if (checkWin(currentPlayer)) {
         showFinishMessage('COMPUTER WIN!');
+        ads();
         setTimeout(resetGame, 2000);
         return;
       } else if (checkDraw()) {
         showFinishMessage('DRAW!!!');
+        ads();
         setTimeout(resetGame, 2000);
         return;
       }
