@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #title {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    #menu {
+      margin-bottom: 20px;
+    }
+
+    #menu button {
+      font-size: 1.6em;
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+
+    #menu button:hover {
+      background-color: #45a049;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 10px;
+      border: 4px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      background-color: #fff;
+    }
+
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3em;
+      border: 1px solid #ccc;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .cell:hover {
+      background-color: #e0e0e0;
+    }
+
+    #finish {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      border-radius: 10px;
+      color: white;
+      display: none;
+      font-size: xx-large;
+    }
+
+    #current-player {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    #lower {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #low {
+      font-size: 1em;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #ddd;
+      color: #444;
+      cursor: pointer;
+    }
+
+    #low:hover {
+      background-color: #bbb;
+    }
+  </style>
+
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+  <script>
+    vkBridge.send('VKWebAppInit');
+  </script>
+
+</head>
+
+<body>
+  <script>
+    vkBridge.send('VKWebAppInit');
+  </script>
+
+  <div id="start">
+    <h1 id="title">Крестики Нолики</h1>
+    <div id="menu">
+      <button onclick="startGame('human')">Против Человека</button><br>
+      <button onclick="startGame('computer')">Против Компьютера</button><br>
+    </div>
+
+    <div id="lower">
+      <button id="low" onclick="share()">Поделиться</button><br>
+      <button id="low" onclick="inviteFriend()">Пригласить друга</button><br>
+    </div>
+
+  </div>
+
+  <div id="board" style="display:none;">
+    <div id="current-player"></div> <!-- Добавленный элемент для отображения текущего игрока -->
+    <div id="game-board">
+      <div class="cell" onclick="makeMove(0, 0)"></div>
+      <div class="cell" onclick="makeMove(0, 1)"></div>
+      <div class="cell" onclick="makeMove(0, 2)"></div>
+      <div class="cell" onclick="makeMove(1, 0)"></div>
+      <div class="cell" onclick="makeMove(1, 1)"></div>
+      <div class="cell" onclick="makeMove(1, 2)"></div>
+      <div class="cell" onclick="makeMove(2, 0)"></div>
+      <div class="cell" onclick="makeMove(2, 1)"></div>
+      <div class="cell" onclick="makeMove(2, 2)"></div>
+    </div>
+  </div>
+
+  <div id="finish">
+    <p id="finish-text"></p>
+  </div>
+
+  <script>
+
+    let currentPlayer = 'X';
+    let board = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', '']
+    ];
+    let gameType = '';
+
+
+    let adCount = 0;
+    function adds() {
+      adCount++;
+      console.log(adCount);
+      //баннер
+      vkBridge.send('VKWebAppShowBannerAd', {
+        banner_location: 'bottom'
+      })
+        .then((data) => {
+          if (data.result) {
+            // Баннерная реклама отобразилась
+          }
+        })
+        .catch((error) => {
+          // Ошибка
+          console.log(error);
+        });
+
+
+      if (adCount === 2) {
+        vkBridge.send('VKWebAppShowNativeAds', {
+          ad_format: 'interstitial' /* Тип рекламы */
+        })
+          .then((data) => {
+            if (data.result) {
+              // Реклама была показана
+            } else {
+              // Ошибка
+            }
+          })
+          .catch((error) => { console.log(error); });
+      }
+
+      if (adCount === 5) {
+        adCount = -1;
+        vkBridge.send('VKWebAppShowNativeAds', {
+          ad_format: 'interstitial' /* Тип рекламы */
+        })
+          .then((data) => {
+            if (data.result) {
+              // Реклама была показана
+            } else {
+              // Ошибка
+            }
+          })
+          .catch((error) => { console.log(error); });
+      }
+    }
+
+
+    function startGame(type) {
+      adds();
+      gameType = type;
+      document.getElementById('start').style.display = 'none';
+      document.getElementById('board').style.display = 'block';
+      document.getElementById('finish').style.display = 'none';
+      document.getElementById('current-player').innerText = `Ходит игрок: ${currentPlayer}`; // Обновление информации о текущем игроке
+      renderBoard();
+      if (gameType === 'computer' && currentPlayer === 'O') {
+        setTimeout(computerMove, 1);
+      }
+    }
+
+    function makeMove(row, col) {
+      if (board[row][col] === '') {
+        board[row][col] = currentPlayer;
+        renderBoard();
+        if (checkWin(currentPlayer)) {
+          showFinishMessage(currentPlayer + ' ПОБЕДИЛ!');
+          setTimeout(resetGame, 2000);
+          return;
+        } else if (checkDraw()) {
+          showFinishMessage('НИЧЬЯ!!!');
+          setTimeout(resetGame, 2000);
+          return;
+        }
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        document.getElementById('current-player').innerText = `Ходит игрок: ${currentPlayer}`; // Обновление информации о текущем игроке
+        if (gameType === 'computer' && currentPlayer === 'O') {
+          setTimeout(computerMove, 1);
+        }
+      }
+    }
+
+    function renderBoard() {
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          document.querySelector(`.cell:nth-child(${row * 3 + col + 1})`).innerText = board[row][col];
+        }
+      }
+    }
+
+    function checkWin(player) {
+      // Check rows
+      for (let row = 0; row < 3; row++) {
+        if (board[row][0] === player && board[row][1] === player && board[row][2] === player) {
+          return true;
+        }
+      }
+      // Check columns
+      for (let col = 0; col < 3; col++) {
+        if (board[0][col] === player && board[1][col] === player && board[2][col] === player) {
+          return true;
+        }
+      }
+      // Check diagonals
+      if (board[0][0] === player && board[1][1] === player && board[2][2] === player) {
+        return true;
+      }
+      if (board[0][2] === player && board[1][1] === player && board[2][0] === player) {
+        return true;
+      }
+      return false;
+    }
+
+    function checkDraw() {
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          if (board[row][col] === '') {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function showFinishMessage(message) {
+      document.getElementById('finish-text').innerText = message;
+      document.getElementById('finish').style.display = 'block';
+      document.getElementById('board').style.filter = 'blur(10px)';
+    }
+
+    function resetGame() {
+      currentPlayer = 'X';
+      board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ];
+      renderBoard();
+      document.getElementById('start').style.display = 'block';
+      document.getElementById('board').style.display = 'none';
+      document.getElementById('finish').style.display = 'none';
+      document.getElementById('board').style.filter = 'none';
+    }
+
+    function computerMove() {
+      let bestScore = -Infinity;
+      let move;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (board[i][j] === '') {
+            board[i][j] = currentPlayer;
+            let score = minimax(board, 0, false);
+            board[i][j] = '';
+            if (score > bestScore) {
+              bestScore = score;
+              move = { i, j };
+            }
+          }
+        }
+      }
+      board[move.i][move.j] = currentPlayer;
+      renderBoard();
+      if (checkWin(currentPlayer)) {
+        showFinishMessage('КОМПЬЮТЕР ВЫИГРАЛ!');
+        setTimeout(resetGame, 2000);
+        return;
+      } else if (checkDraw()) {
+        showFinishMessage('НИЧЬЯ!!!');
+        setTimeout(resetGame, 2000);
+        return;
+      }
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      document.getElementById('current-player').innerText = `Ходит игрок: ${currentPlayer}`; // Обновление информации о текущем игроке
+    }
+
+    function minimax(board, depth, isMaximizing) {
+      let result = checkResult();
+      if (result !== null) {
+        return result;
+      }
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (board[i][j] === '') {
+              board[i][j] = 'O';
+              let score = minimax(board, depth + 1, false);
+              board[i][j] = '';
+              bestScore = Math.max(score, bestScore);
+            }
+          }
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (board[i][j] === '') {
+              board[i][j] = 'X';
+              let score = minimax(board, depth + 1, true);
+              board[i][j] = '';
+              bestScore = Math.min(score, bestScore);
+            }
+          }
+        }
+        return bestScore;
+      }
+    }
+
+    function checkResult() {
+      for (let i = 0; i < 3; i++) {
+        // Check rows
+        if (board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
+          if (board[i][0] === 'X') return -10;
+          else if (board[i][0] === 'O') return 10;
+        }
+        // Check columns
+        if (board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
+          if (board[0][i] === 'X') return -10;
+          else if (board[0][i] === 'O') return 10;
+        }
+      }
+      // Check diagonals
+      if (board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
+        if (board[0][0] === 'X') return -10;
+        else if (board[0][0] === 'O') return 10;
+      }
+      if (board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
+        if (board[0][2] === 'X') return -10;
+        else if (board[0][2] === 'O') return 10;
+      }
+      return null; // No winner yet
+    }
+
+    function share() {
+      vkBridge.send('VKWebAppShare', {
+  link: 'https://vk.com/app51895658'
+  })
+  .then((data) => { 
+    if (data.result) {
+      // Запись размещена, история опубликована, сообщение отправлено
+    }
+  })
+  .catch((error) => {
+    // Ошибка
+    console.log(error);
+  });
+    }
+
+    function inviteFriend() {
+      vkBridge.send('VKWebAppShowInviteBox', {
+  requestKey: "key-12345" //  Ключ приглашения
+  })
+  .then( (data) => {
+    if (data.success) {
+      // Пользователь нажал «Пригласить» 
+      // ...
+  
+      // Этим выбранным пользователям 
+      // не удалось отправить приглашения 
+      console.log('Приглашения не отправлены', data.notSentIds);
+    }
+  })
+  .catch( (error) => {
+    console.log(error); // Ошибка 
+  });
+    }
+  </script>
+
+</body>
+
+</html>
