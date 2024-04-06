@@ -155,7 +155,7 @@
       ['', '', '']
     ];
     let gameType = '';
-
+    let isstart = false;
     function startGame(type) {
       gameType = type;
       document.getElementById('start').style.display = 'none';
@@ -165,6 +165,22 @@
       renderBoard();
       if (gameType === 'computer' && currentPlayer === 'O') {
         setTimeout(computerMove, 1);
+      }
+
+      if(isstart===false){
+        isstart = true;
+        async function b() { 
+          try {
+          // await is not mandatory when requesting banners, but it will allow you to catch errors
+          await window.CrazyGames.SDK.banner.requestBanner({
+            id: "banner-container",
+            width: 300,
+            height: 250,
+          });
+        } catch (e) {
+          console.log("Banner request error", e);
+        }}
+        b();
       }
     }
 
@@ -359,21 +375,9 @@
     }
   </script>
 <script> 
-  async function a() { window.CrazyGames.SDK.init(); }
-async function b() { 
-  try {
-  // await is not mandatory when requesting banners, but it will allow you to catch errors
-  await window.CrazyGames.SDK.banner.requestBanner({
-    id: "banner-container",
-    width: 300,
-    height: 250,
-  });
-} catch (e) {
-  console.log("Banner request error", e);
-}}
-  
+  async function a() { window.CrazyGames.SDK.init(); } 
   a();
-  setTimeout( b(), 5000 );
+
 </script>
 <div id="banner-container" style="width: 100%; height: 15%; position:absolute; bottom:0;"></div>
 </body>
